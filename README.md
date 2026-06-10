@@ -1,8 +1,8 @@
 <div align="center">
 
-# Tawjehi Calculator
+# 🧮 Tawjehi Calculator
 
-**Score Conversion & Equivalency Averaging Tool**
+**Score Conversion & Equivalency Averaging Tool** 📊
 
 Convert SAT, CLEP, and AP scores to a unified percentage and compute a composite average across 6 exams.
 
@@ -18,21 +18,21 @@ Convert SAT, CLEP, and AP scores to a unified percentage and compute a composite
 
 ---
 
-## How It Works
+## ⚙️ How It Works
 
 You enter **6 exam scores** — 2 SAT (English & Math) and 4 additional exams (each can be CLEP or AP). Each raw score is automatically mapped to a percentage using the conversion tables below. The app calculates your **Equivalency Average** as the mean of all 6 mapped percentages.
 
 ```
-Equivalency Average = (SAT_Eng% + SAT_Math% + Exam1% + Exam2% + Exam3% + Exam4%) / 6
+📐 Equivalency Average = (SAT_Eng% + SAT_Math% + Exam1% + Exam2% + Exam3% + Exam4%) / 6
 ```
 
-Once you're satisfied, hit **Save Score** to export a clean PDF report.
+Once you're satisfied, hit **Save Score** 📄 to export a clean PDF report.
 
 ---
 
-## Conversion Tables
+## 📋 Conversion Tables
 
-### SAT → Percentage
+### 📘 SAT → Percentage
 
 | Score | % | Score | % | Score | % | Score | % | Score | % |
 |------|---|------|---|------|---|------|---|------|---|
@@ -47,7 +47,7 @@ Once you're satisfied, hit **Save Score** to export a clean PDF report.
 
 <br>
 
-### CLEP → Percentage
+### 📗 CLEP → Percentage
 
 | Score | % | Score | % | Score | % | Score | % | Score | % |
 |------|---|------|---|------|---|------|---|------|---|
@@ -63,7 +63,7 @@ Once you're satisfied, hit **Save Score** to export a clean PDF report.
 
 <br>
 
-### AP → Percentage
+### 📕 AP → Percentage
 
 | Score | % |
 |-------|---|
@@ -74,16 +74,16 @@ Once you're satisfied, hit **Save Score** to export a clean PDF report.
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 ```bash
 npm install
 npm run dev
 ```
 
-Opens at `http://localhost:3000`.
+Opens at `http://localhost:3000`. 🎯
 
-### Commands
+### ⌨️ Commands
 
 | Command | Description |
 |---------|-------------|
@@ -93,7 +93,7 @@ Opens at `http://localhost:3000`.
 
 ---
 
-## Stack
+## 🛠️ Stack
 
 <div align="center">
 
@@ -106,5 +106,5 @@ Opens at `http://localhost:3000`.
 ---
 
 <div align="center">
-  <sub>Built with TypeScript. Licensed under MIT.</sub>
+  <sub>Built with TypeScript 💙 &nbsp;·&nbsp; Licensed under MIT 📄</sub>
 </div>
