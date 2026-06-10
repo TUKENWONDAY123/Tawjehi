@@ -458,7 +458,7 @@ export default function App() {
                   className="bg-white border-2 border-[#1c1c1c] p-6 sm:p-7 space-y-6 print:border-none print:p-0"
                 >
                   {/* TOP: Save button */}
-                  <div className="flex items-center justify-end gap-3 print:hidden">
+                  <div className="flex items-center justify-center gap-3 print:hidden">
                     <button
                       onClick={handleSaveCard}
                       className="px-5 py-2.5 text-sm font-mono font-bold uppercase border-2 border-[#1c1c1c] bg-[#1c1c1c] text-white hover:bg-white hover:text-[#1c1c1c] transition-colors flex items-center gap-2 cursor-pointer"
