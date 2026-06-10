@@ -135,12 +135,7 @@ export default function App() {
     doc.setFont('courier', 'bold');
     doc.setFontSize(10);
     doc.setTextColor('#000000');
-    doc.text('TAWJEHI', 20, 25);
-
-    doc.setFont('courier', 'normal');
-    doc.setFontSize(7);
-    doc.setTextColor('#666666');
-    doc.text(generatedDate, pw - 20, 25, { align: 'right' } as any);
+    doc.text('TAWJEHI', pw / 2, 25, { align: 'center' } as any);
 
     // Red separator line
     doc.setDrawColor('#D32F2F');
