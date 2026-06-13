@@ -422,15 +422,6 @@ export default function App() {
                 className="w-12 sm:w-16 md:w-20 h-0.5 bg-[#D32F2F] mx-auto mt-5 sm:mt-6 md:mb-6 origin-left"
               />
 
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 1 }}
-                className="text-[10px] sm:text-xs md:text-sm font-mono uppercase tracking-[0.3em] sm:tracking-[0.4em] text-neutral-400 mb-8 sm:mb-10 md:mb-12"
-              >
-                Equivalency Calculator
-              </motion.p>
-
               <motion.button
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -444,14 +435,6 @@ export default function App() {
               </motion.button>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 1.5 }}
-              className="absolute bottom-8"
-            >
-              <p className="text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase tracking-[0.2em] sm:tracking-[0.3em] text-neutral-300">Clep & AP Score Calculator</p>
-            </motion.div>
           </motion.div>
         ) : (
           <motion.div
