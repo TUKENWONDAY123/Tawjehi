@@ -14,9 +14,118 @@ import {
   getAdditionalExamStatus 
 } from './data';
 
+const CLEP_EXAMS = [
+  { category: 'History and Social Sciences', exams: [
+    'American Government',
+    'History of the United States I: Early Colonization to 1877',
+    'History of the United States II: 1865 to the Present',
+    'Human Growth and Development',
+    'Introduction to Educational Psychology',
+    'Introductory Psychology',
+    'Introductory Sociology',
+    'Principles of Macroeconomics',
+    'Principles of Microeconomics',
+    'Social Sciences and History',
+    'Western Civilization I: Ancient Near East to 1648',
+    'Western Civilization II: 1648 to the Present',
+  ]},
+  { category: 'Composition and Literature', exams: [
+    'American Literature',
+    'Analyzing and Interpreting Literature',
+    'College Composition',
+    'College Composition Modular',
+    'English Literature',
+    'Humanities',
+  ]},
+  { category: 'Science and Mathematics', exams: [
+    'Biology',
+    'Calculus',
+    'Chemistry',
+    'College Algebra',
+    'College Mathematics',
+    'Natural Sciences',
+    'Precalculus',
+  ]},
+  { category: 'Business', exams: [
+    'Financial Accounting',
+    'Information Systems',
+    'Introductory Business Law',
+    'Principles of Management',
+    'Principles of Marketing',
+  ]},
+  { category: 'World Languages', exams: [
+    'French Language: Levels 1 and 2',
+    'German Language: Levels 1 and 2',
+    'Spanish Language: Levels 1 and 2',
+    'Spanish with Writing: Levels 1 and 2',
+  ]},
+];
+
+const AP_EXAMS = [
+  { category: 'Arts', exams: [
+    'AP 2-D Art and Design',
+    'AP 3-D Art and Design',
+    'AP Drawing',
+    'AP Art History',
+    'AP Music Theory',
+  ]},
+  { category: 'English', exams: [
+    'AP English Language and Composition',
+    'AP English Literature and Composition',
+  ]},
+  { category: 'History and Social Sciences', exams: [
+    'AP African American Studies',
+    'AP Comparative Government and Politics',
+    'AP European History',
+    'AP Human Geography',
+    'AP Macroeconomics',
+    'AP Microeconomics',
+    'AP Psychology',
+    'AP United States Government and Politics',
+    'AP United States History',
+    'AP World History: Modern',
+  ]},
+  { category: 'Math and Computer Science', exams: [
+    'AP Calculus AB',
+    'AP Calculus BC',
+    'AP Computer Science A',
+    'AP Computer Science Principles',
+    'AP Precalculus',
+    'AP Statistics',
+  ]},
+  { category: 'Sciences', exams: [
+    'AP Biology',
+    'AP Chemistry',
+    'AP Environmental Science',
+    'AP Physics 1: Algebra-Based',
+    'AP Physics 2: Algebra-Based',
+    'AP Physics C: Electricity and Magnetism',
+    'AP Physics C: Mechanics',
+  ]},
+  { category: 'World Languages and Cultures', exams: [
+    'AP Chinese Language and Culture',
+    'AP French Language and Culture',
+    'AP German Language and Culture',
+    'AP Italian Language and Culture',
+    'AP Japanese Language and Culture',
+    'AP Latin',
+    'AP Spanish Language and Culture',
+    'AP Spanish Literature and Culture',
+  ]},
+  { category: 'AP Capstone', exams: [
+    'AP Research',
+    'AP Seminar',
+  ]},
+  { category: 'AP Career Kickstart', exams: [
+    'AP Business with Personal Finance',
+    'AP Cybersecurity',
+  ]},
+];
+
 interface AdditionalExam {
   type: 'AP' | 'CLEP';
   value: string;
+  name: string;
 }
 
 const makeTimestamp = (date: Date = new Date()): string => {
@@ -36,14 +145,16 @@ export default function App() {
   const [satMath, setSatMath] = useState<string>('620');
 
   const [additionalExams, setAdditionalExams] = useState<AdditionalExam[]>([
-    { type: 'CLEP', value: '50' },
-    { type: 'CLEP', value: '50' },
-    { type: 'CLEP', value: '50' },
-    { type: 'CLEP', value: '50' },
+    { type: 'CLEP', value: '50', name: '' },
+    { type: 'CLEP', value: '50', name: '' },
+    { type: 'CLEP', value: '50', name: '' },
+    { type: 'CLEP', value: '50', name: '' },
   ]);
 
   const [saved, setSaved] = useState(false);
   const [generatedDate, setGeneratedDate] = useState(() => makeTimestamp());
+  const [showExamNameModal, setShowExamNameModal] = useState(false);
+  const [activeExamPicker, setActiveExamPicker] = useState<number | null>(null);
 
   // Input Validation and Real-Time Percentage lookups
   const engStatus = getSatEnglishStatus(satEnglish);
@@ -95,14 +206,26 @@ export default function App() {
     setSatEnglish('');
     setSatMath('');
     setAdditionalExams([
-      { type: 'CLEP', value: '50' },
-      { type: 'CLEP', value: '50' },
-      { type: 'CLEP', value: '50' },
-      { type: 'CLEP', value: '50' },
+      { type: 'CLEP', value: '50', name: '' },
+      { type: 'CLEP', value: '50', name: '' },
+      { type: 'CLEP', value: '50', name: '' },
+      { type: 'CLEP', value: '50', name: '' },
     ]);
   };
 
-  const handleSaveCard = async () => {
+  const handleSaveCard = () => {
+    if (!calculatedInfo) return;
+    setShowExamNameModal(true);
+  };
+
+  const handleExamNameConfirm = async () => {
+    setShowExamNameModal(false);
+    await generatePDF();
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const generatePDF = async () => {
     if (!calculatedInfo) return;
 
     const jsPDF = (await import('jspdf')).default;
@@ -169,8 +292,10 @@ export default function App() {
     const rows = [
       { name: 'SAT ENGLISH', score: String(satEnglish), percent: calculatedInfo.engPercent },
       { name: 'SAT MATH', score: String(satMath), percent: calculatedInfo.mathPercent },
-      ...calculatedInfo.compiledExams.map((ex) => ({
-        name: ex.type === 'AP' ? `AP EXAM` : `CLEP EXAM`,
+      ...calculatedInfo.compiledExams.map((ex, i) => ({
+        name: ex.type === 'AP'
+          ? (additionalExams[i].name || 'AP EXAM')
+          : (additionalExams[i].name ? `${additionalExams[i].name} CLEP` : 'CLEP EXAM'),
         score: String(ex.rawVal),
         percent: ex.percent,
       })),
@@ -250,9 +375,6 @@ export default function App() {
     doc.text('TAWJEHI CALCULATOR', pw / 2, ph - 16, { align: 'center' } as any);
 
     doc.save('tawjehi_score_report.pdf');
-
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
   };
 
   // Dynamically change specific exam slot type
@@ -260,7 +382,8 @@ export default function App() {
     const updated = [...additionalExams];
     updated[index] = { 
       type: newType, 
-      value: newType === 'AP' ? '' : '35' // Default to min for CLEP when toggled
+      value: newType === 'AP' ? '' : '35',
+      name: updated[index].name
     };
     setAdditionalExams(updated);
   };
@@ -502,6 +625,162 @@ export default function App() {
         </div>
 
       </div>
+
+      {/* Exam Name Modal */}
+      <AnimatePresence>
+        {showExamNameModal && (
+          <motion.div
+            key="exam-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => { setShowExamNameModal(false); setActiveExamPicker(null); }}
+          >
+            <motion.div
+              key="exam-modal-dialog"
+              initial={{ opacity: 0, scale: 0.9, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: 'spring', damping: 18, stiffness: 220 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white border-2 border-[#1c1c1c] p-8 max-w-lg w-full mx-4 max-h-[85vh] overflow-y-auto"
+            >
+              <div className="mb-6">
+                <h3 className="text-xl font-serif font-black uppercase tracking-tight mb-1">Name Your Exams</h3>
+                <p className="text-xs font-mono text-neutral-400 uppercase tracking-widest">Tap a score to pick its test name</p>
+              </div>
+
+              <div className="space-y-3">
+                {additionalExams.map((exam, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + i * 0.07, type: 'spring', damping: 20, stiffness: 200 }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setActiveExamPicker(activeExamPicker === i ? null : i)}
+                      className={`w-full text-left bg-[#f8f5f2] border-l-4 p-4 transition-all cursor-pointer ${exam.name ? 'border-l-emerald-700' : 'border-l-[#D32F2F]'}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-baseline gap-3">
+                          <span className="text-3xl font-mono font-black text-[#D32F2F]">{exam.value}</span>
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-neutral-400 bg-[#1c1c1c] text-white px-2 py-0.5">{exam.type}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {exam.name ? (
+                            <span className="text-xs font-mono text-[#1c1c1c] max-w-[180px] truncate">{exam.name}</span>
+                          ) : (
+                            <span className="text-xs font-mono text-neutral-400 italic">Choose exam...</span>
+                          )}
+                          <motion.div
+                            animate={{ rotate: activeExamPicker === i ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <svg className="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </motion.div>
+                        </div>
+                      </div>
+                    </button>
+
+                    <AnimatePresence>
+                      {activeExamPicker === i && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <div className="bg-white border-2 border-[#1c1c1c] border-t-0 max-h-64 overflow-y-auto">
+                            {exam.type === 'CLEP' ? (
+                              CLEP_EXAMS.map((group, gi) => (
+                                <motion.div
+                                  key={group.category}
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ delay: gi * 0.03 }}
+                                >
+                                  <div className="px-4 py-2 bg-[#1c1c1c] text-white text-[10px] font-mono font-bold uppercase tracking-widest sticky top-0 z-10">
+                                    {group.category}
+                                  </div>
+                                  {group.exams.map((name) => (
+                                    <button
+                                      key={name}
+                                      type="button"
+                                      onClick={() => {
+                                        const updated = [...additionalExams];
+                                        updated[i] = { ...updated[i], name };
+                                        setAdditionalExams(updated);
+                                        setActiveExamPicker(null);
+                                      }}
+                                      className={`w-full text-left px-4 py-2.5 text-sm font-mono border-b border-[#1c1c1c]/10 transition-all cursor-pointer ${exam.name === name ? 'bg-[#D32F2F] text-white font-bold' : 'hover:bg-[#f8f5f2] text-[#1c1c1c]'}`}
+                                    >
+                                      {name}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              ))
+                            ) : (
+                              AP_EXAMS.map((group, gi) => (
+                                <motion.div
+                                  key={group.category}
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ delay: gi * 0.03 }}
+                                >
+                                  <div className="px-4 py-2 bg-[#1c1c1c] text-white text-[10px] font-mono font-bold uppercase tracking-widest sticky top-0 z-10">
+                                    {group.category}
+                                  </div>
+                                  {group.exams.map((name) => (
+                                    <button
+                                      key={name}
+                                      type="button"
+                                      onClick={() => {
+                                        const updated = [...additionalExams];
+                                        updated[i] = { ...updated[i], name };
+                                        setAdditionalExams(updated);
+                                        setActiveExamPicker(null);
+                                      }}
+                                      className={`w-full text-left px-4 py-2.5 text-sm font-mono border-b border-[#1c1c1c]/10 transition-all cursor-pointer ${exam.name === name ? 'bg-[#D32F2F] text-white font-bold' : 'hover:bg-[#f8f5f2] text-[#1c1c1c]'}`}
+                                    >
+                                      {name}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              ))
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => { setShowExamNameModal(false); setActiveExamPicker(null); }}
+                  className="flex-1 px-4 py-3 text-xs font-mono font-bold uppercase tracking-wider border-2 border-[#1c1c1c]/20 text-neutral-400 hover:border-[#1c1c1c] hover:text-[#1c1c1c] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleExamNameConfirm}
+                  className="flex-1 px-4 py-3 text-xs font-mono font-bold uppercase tracking-wider border-2 border-[#1c1c1c] bg-[#1c1c1c] text-white hover:bg-white hover:text-[#1c1c1c] transition-all"
+                >
+                  Save PDF
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
