@@ -155,6 +155,7 @@ export default function App() {
   const [generatedDate, setGeneratedDate] = useState(() => makeTimestamp());
   const [showExamNameModal, setShowExamNameModal] = useState(false);
   const [activeExamPicker, setActiveExamPicker] = useState<number | null>(null);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   // Input Validation and Real-Time Percentage lookups
   const engStatus = getSatEnglishStatus(satEnglish);
@@ -234,60 +235,83 @@ export default function App() {
     const pw = doc.internal.pageSize.getWidth();
     const ph = doc.internal.pageSize.getHeight();
 
-    // White background
-    doc.setFillColor('#FFFFFF');
+    // Background
+    doc.setFillColor('#F8F5F2');
     doc.rect(0, 0, pw, ph, 'F');
 
-    // Large red circle (Hinomaru inspired) top right
+    // Top accent bar
+    doc.setFillColor('#1C1C1C');
+    doc.rect(0, 0, pw, 6, 'F');
+
+    // Red accent stripe
     doc.setFillColor('#D32F2F');
-    (doc as any).setGState((doc as any).GState({ opacity: 0.08 }));
-    doc.circle(pw - 20, 10, 60, 'F');
+    doc.rect(0, 6, pw, 2, 'F');
 
-    // Full red circle bottom right
-    doc.circle(pw - 30, ph - 40, 80, 'F');
-    (doc as any).setGState((doc as any).GState({ opacity: 1 }));
+    // Main content frame
+    doc.setDrawColor('#1C1C1C');
+    doc.setLineWidth(0.8);
+    doc.rect(16, 20, pw - 32, ph - 40, 'S');
 
-    // Thin black double border frame
-    doc.setDrawColor('#000000');
-    doc.setLineWidth(0.5);
-    doc.rect(10, 10, pw - 20, ph - 20, 'S');
-    doc.setLineWidth(0.2);
-    doc.rect(12, 12, pw - 24, ph - 24, 'S');
-
-    // Header
-    doc.setFont('courier', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor('#000000');
-    doc.text('TAWJEHI', pw / 2, 25, { align: 'center' } as any);
-
-    // Red separator line
-    doc.setDrawColor('#D32F2F');
-    doc.setLineWidth(0.5);
-    doc.line(20, 30, pw - 20, 30);
-
-    // Hero section
-    const score = calculatedInfo.average.toFixed(2);
+    // Header block
+    doc.setFillColor('#1C1C1C');
+    doc.rect(16, 20, pw - 32, 22, 'F');
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(64);
-    doc.setTextColor('#D32F2F');
-    doc.text(score, pw / 2, 75, { align: 'center' } as any);
+    doc.setFontSize(18);
+    doc.setTextColor('#FFFFFF');
+    doc.text('TAWJEHI', 26, 34);
 
-    doc.setFontSize(28);
-    doc.setTextColor('#000000');
-    doc.text('%', pw / 2 + 55, 70, { align: 'center' } as any);
-
-    // Sub label
     doc.setFont('courier', 'normal');
-    doc.setFontSize(6);
+    doc.setFontSize(7);
     doc.setTextColor('#999999');
-    doc.text('— 6 EXAMS / 100 MAX —', pw / 2, 90, { align: 'center' } as any);
+    doc.text('SCORE REPORT', pw - 26, 34, { align: 'right' } as any);
 
-    // Breakdown
-    let by = 105;
-    doc.setFillColor('#000000');
-    doc.rect(20, by, pw - 40, 1, 'F');
-    by += 6;
+    doc.setFontSize(6);
+    doc.text(generatedDate, pw - 26, 38, { align: 'right' } as any);
+
+    // Score hero section
+    const score = calculatedInfo.average.toFixed(2);
+
+    doc.setFillColor('#D32F2F');
+    doc.rect(16, 42, pw - 32, 0.5, 'F');
+
+    // Large score
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(72);
+    doc.setTextColor('#1C1C1C');
+    doc.text(score, pw / 2 - 8, 82, { align: 'center' } as any);
+
+    doc.setFontSize(30);
+    doc.setTextColor('#D32F2F');
+    doc.text('%', pw / 2 + 42, 76, { align: 'center' } as any);
+
+    // Score subtitle
+    doc.setDrawColor('#1C1C1C');
+    doc.setLineWidth(0.3);
+    doc.line(pw / 2 - 40, 88, pw / 2 + 40, 88);
+
+    doc.setFont('courier', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor('#999999');
+    doc.text('EQUIVALENCY AVERAGE', pw / 2, 93, { align: 'center' } as any);
+
+    doc.setFont('courier', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor('#1C1C1C');
+    doc.text(`${calculatedInfo.sum.toFixed(1)} / 6`, pw / 2, 99, { align: 'center' } as any);
+
+    // Section divider
+    let by = 110;
+    doc.setFillColor('#1C1C1C');
+    doc.rect(20, by, pw - 40, 0.5, 'F');
+    by += 5;
+
+    // Section title
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor('#1C1C1C');
+    doc.text('EXAM BREAKDOWN', 24, by);
+    by += 8;
 
     const rows = [
       { name: 'SAT ENGLISH', score: String(satEnglish), percent: calculatedInfo.engPercent },
@@ -301,78 +325,48 @@ export default function App() {
       })),
     ];
 
-    rows.forEach((row) => {
+    rows.forEach((row, idx) => {
       const yPos = by;
 
-      // Red circle bullet
-      doc.setFillColor('#D32F2F');
-      doc.circle(24, yPos - 1.5, 1.5, 'F');
+      // Alternating row background
+      if (idx % 2 === 0) {
+        doc.setFillColor('#EDE9E3');
+        doc.rect(20, yPos - 4, pw - 40, 10, 'F');
+      }
 
+      // Red left accent
+      doc.setFillColor('#D32F2F');
+      doc.rect(20, yPos - 4, 1.5, 10, 'F');
+
+      // Exam name
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8);
-      doc.setTextColor('#000000');
-      doc.text(row.name, 32, yPos);
+      doc.setTextColor('#1C1C1C');
+      doc.text(row.name, 26, yPos + 1);
 
-      // Score in a bordered box
-      doc.setDrawColor('#D32F2F');
-      doc.setLineWidth(0.3);
-      const scoreW = doc.getTextWidth(row.score) + 4;
-      doc.rect(pw / 2 + 5, yPos - 3, scoreW + 4, 6, 'S');
+      // Score badge
+      doc.setFillColor('#1C1C1C');
+      const scoreW = doc.getTextWidth(row.score) + 6;
+      doc.roundedRect(pw / 2 + 2, yPos - 3.5, scoreW, 7, 1, 1, 'F');
       doc.setFont('courier', 'bold');
       doc.setFontSize(7);
-      doc.setTextColor('#D32F2F');
-      doc.text(row.score, pw / 2 + 7 + scoreW / 2, yPos, { align: 'center' } as any);
+      doc.setTextColor('#FFFFFF');
+      doc.text(row.score, pw / 2 + 4 + scoreW / 2, yPos + 0.5, { align: 'center' } as any);
 
+      // Percentage
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      doc.setTextColor('#000000');
-      doc.text(`${row.percent.toFixed(1)}%`, pw - 25, yPos, { align: 'right' } as any);
+      doc.setFontSize(9);
+      doc.setTextColor('#D32F2F');
+      doc.text(`${row.percent.toFixed(1)}%`, pw - 24, yPos + 1, { align: 'right' } as any);
 
-      // Red underline
-      doc.setDrawColor('#D32F2F');
-      doc.setLineWidth(0.2);
-      doc.line(32, yPos + 2, pw - 25, yPos + 2);
-
-      by += 9;
+      by += 10;
     });
 
-    // Formula
-    by += 6;
-    doc.setFillColor('#000000');
-    doc.rect(20, by, pw - 40, 1, 'F');
-    by += 4;
-
-    doc.setFont('courier', 'bold');
-    doc.setFontSize(9);
-    doc.setTextColor('#000000');
-    doc.text('SUM', 25, by);
-    doc.setFont('courier', 'normal');
-    doc.text(calculatedInfo.sum.toFixed(2), 55, by);
-
-    doc.setFont('courier', 'bold');
-    doc.setTextColor('#D32F2F');
-    doc.text('/ 6', pw / 2, by, { align: 'center' } as any);
-
-    doc.setFont('courier', 'bold');
-    doc.setTextColor('#000000');
-    doc.text('=', pw / 2 + 15, by, { align: 'center' } as any);
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor('#D32F2F');
-    doc.text(`${calculatedInfo.average.toFixed(2)}%`, pw - 30, by, { align: 'right' } as any);
-
-    // Vertical text on left
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(6);
-    doc.setTextColor('#D32F2F');
-    doc.text('SCORE REPORT', 16, ph / 2, { angle: 90, align: 'center' } as any);
-
-    // Footer
-    doc.setFont('courier', 'normal');
-    doc.setFontSize(5);
-    doc.setTextColor('#CCCCCC');
-    doc.text('TAWJEHI CALCULATOR', pw / 2, ph - 16, { align: 'center' } as any);
+    // Bottom accent bar
+    doc.setFillColor('#D32F2F');
+    doc.rect(0, ph - 8, pw, 2, 'F');
+    doc.setFillColor('#1C1C1C');
+    doc.rect(0, ph - 6, pw, 6, 'F');
 
     doc.save('tawjehi_score_report.pdf');
   };
@@ -395,36 +389,92 @@ export default function App() {
   };
 
   return (
-    <div id="app-root" className="min-h-screen bg-[#f8f5f2] text-[#1c1c1c] font-sans selection:bg-[#1c1c1c] selection:text-white py-14 px-4 sm:px-6 md:px-10">
-      <div className="max-w-7xl mx-auto space-y-10">
-
-        {/* HEADER */}
-        <div className="flex items-center justify-between border-b-2 border-[#1c1c1c] pb-5">
-          <h1 className="text-4xl font-serif font-black tracking-tight uppercase leading-none">
-            Tawjehi Calculator
-          </h1>
-          <button
-            onClick={handleResetInputs}
-            className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-neutral-500 hover:text-[#1c1c1c] transition-colors px-3 py-2 border border-transparent hover:border-[#1c1c1c]"
-            title="Reset all inputs"
+    <div id="app-root" className="min-h-screen bg-[#f8f5f2] text-[#1c1c1c] font-sans selection:bg-[#1c1c1c] selection:text-white">
+      <AnimatePresence mode="wait">
+        {showWelcome ? (
+          <motion.div
+            key="welcome"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.5 }}
+            className="min-h-screen flex flex-col items-center justify-center px-6 py-10"
           >
-            <RotateCcw className="w-4 h-4" />
-            Reset
-          </button>
-        </div>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="text-center"
+            >
+              <motion.h1
+                initial={{ opacity: 0, y: 30, letterSpacing: '0.5em' }}
+                animate={{ opacity: 1, y: 0, letterSpacing: '-0.05em' }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                className="text-[4rem] sm:text-[7rem] md:text-[10rem] lg:text-[12rem] xl:text-[14rem] font-serif font-black uppercase leading-none"
+              >
+                Tawjehi
+              </motion.h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.6, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="w-12 sm:w-16 md:w-20 h-0.5 bg-[#D32F2F] mx-auto mt-5 sm:mt-6 md:mb-6 origin-left"
+              />
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 1 }}
+                className="text-[10px] sm:text-xs md:text-sm font-mono uppercase tracking-[0.3em] sm:tracking-[0.4em] text-neutral-400 mb-8 sm:mb-10 md:mb-12"
+              >
+                Equivalency Calculator
+              </motion.p>
+
+              <motion.button
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 1.2 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => setShowWelcome(false)}
+                className="px-8 sm:px-10 md:px-14 py-3.5 sm:py-4 md:py-5 text-xs sm:text-sm md:text-base font-mono font-bold uppercase tracking-[0.2em] sm:tracking-[0.25em] border-2 border-[#1c1c1c] bg-[#1c1c1c] text-white hover:bg-[#f8f5f2] hover:text-[#1c1c1c] transition-colors cursor-pointer shadow-[3px_3px_0_0_#D32F2F] sm:shadow-[4px_4px_0_0_#D32F2F] md:shadow-[5px_5px_0_0_#D32F2F]"
+              >
+                Calculate My Score
+              </motion.button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 1.5 }}
+              className="absolute bottom-8"
+            >
+              <p className="text-[8px] sm:text-[9px] md:text-[10px] font-mono uppercase tracking-[0.2em] sm:tracking-[0.3em] text-neutral-300">Clep & AP Score Calculator</p>
+            </motion.div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="app"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="py-16 px-8 sm:px-10 md:px-14"
+          >
+            <div className="max-w-[80rem] mx-auto space-y-12">
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
           {/* COLUMN 1: INPUT GRID (7 columns) */}
-          <div className="lg:col-span-7 bg-white border-2 border-[#1c1c1c] p-6 sm:p-7 print:hidden">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="lg:col-span-7 bg-white border-2 border-[#1c1c1c] p-8 sm:p-10 print:hidden shadow-[5px_5px_0_0_#1c1c1c]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* SAT ENGLISH */}
-              <div className={`bg-[#f8f5f2] p-4 border-l-4 ${satEnglish && !engStatus.isInvalid ? 'border-l-emerald-700' : 'border-l-amber-500'}`}>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-mono uppercase tracking-wider text-neutral-500">SAT English</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl font-mono font-black">{satEnglish || '—'}</span>
-                    <span className="text-[10px] font-mono bg-[#1c1c1c] text-white px-2 py-0.5 uppercase font-bold">SAT</span>
+              <div className={`bg-[#f8f5f2] p-7 border-l-4 ${satEnglish && !engStatus.isInvalid ? 'border-l-emerald-700' : 'border-l-amber-500'}`}>
+                <div className="flex items-center justify-between mb-5">
+                  <span className="text-sm font-mono uppercase tracking-widest text-neutral-500">SAT English</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-5xl font-mono font-black">{satEnglish || '—'}</span>
+                    <span className="text-xs font-mono bg-[#1c1c1c] text-white px-2 py-1 uppercase font-bold">SAT</span>
                   </div>
                 </div>
                 <input
@@ -435,25 +485,25 @@ export default function App() {
                   value={satEnglish || '400'}
                   onChange={(e) => setSatEnglish(e.target.value)}
                   aria-label="SAT English score"
-                  className="w-full h-2.5 bg-[#e0dbd5] appearance-none cursor-pointer accent-[#1c1c1c] focus:outline-hidden"
+                  className="w-full h-3.5 bg-[#e0dbd5] appearance-none cursor-pointer accent-[#1c1c1c] focus:outline-hidden rounded-full"
                 />
-                <div className="flex justify-between text-[10px] font-mono text-neutral-400 mt-2">
+                <div className="flex justify-between text-xs font-mono text-neutral-400 mt-3">
                   <span>400</span>
                   <span>800</span>
                 </div>
-                <div className="flex justify-between items-center mt-3 pt-3 border-t border-[#1c1c1c]/10 text-xs">
-                  <span className="text-neutral-500 font-mono uppercase">Mapped</span>
-                  <span className="font-mono font-bold">{engStatus.percent ?? '—'}%</span>
+                <div className="flex justify-between items-center mt-4 pt-4 border-t border-[#1c1c1c]/10 text-sm">
+                  <span className="text-neutral-400 font-mono uppercase tracking-wider">Equivalency</span>
+                  <span className="font-mono font-black text-[#1c1c1c]">{engStatus.percent ?? '—'}%</span>
                 </div>
               </div>
 
               {/* SAT MATH */}
-              <div className={`bg-[#f8f5f2] p-4 border-l-4 ${satMath && !mathStatus.isInvalid ? 'border-l-emerald-700' : 'border-l-amber-500'}`}>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-mono uppercase tracking-wider text-neutral-500">SAT Math</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl font-mono font-black">{satMath || '—'}</span>
-                    <span className="text-[10px] font-mono bg-[#1c1c1c] text-white px-2 py-0.5 uppercase font-bold">SAT</span>
+              <div className={`bg-[#f8f5f2] p-7 border-l-4 ${satMath && !mathStatus.isInvalid ? 'border-l-emerald-700' : 'border-l-amber-500'}`}>
+                <div className="flex items-center justify-between mb-5">
+                  <span className="text-sm font-mono uppercase tracking-widest text-neutral-500">SAT Math</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-5xl font-mono font-black">{satMath || '—'}</span>
+                    <span className="text-xs font-mono bg-[#1c1c1c] text-white px-2 py-1 uppercase font-bold">SAT</span>
                   </div>
                 </div>
                 <input
@@ -464,15 +514,15 @@ export default function App() {
                   value={satMath || '400'}
                   onChange={(e) => setSatMath(e.target.value)}
                   aria-label="SAT Math score"
-                  className="w-full h-2.5 bg-[#e0dbd5] appearance-none cursor-pointer accent-[#1c1c1c] focus:outline-hidden"
+                  className="w-full h-3.5 bg-[#e0dbd5] appearance-none cursor-pointer accent-[#1c1c1c] focus:outline-hidden rounded-full"
                 />
-                <div className="flex justify-between text-[10px] font-mono text-neutral-400 mt-2">
+                <div className="flex justify-between text-xs font-mono text-neutral-400 mt-3">
                   <span>400</span>
                   <span>800</span>
                 </div>
-                <div className="flex justify-between items-center mt-3 pt-3 border-t border-[#1c1c1c]/10 text-xs">
-                  <span className="text-neutral-500 font-mono uppercase">Mapped</span>
-                  <span className="font-mono font-bold">{mathStatus.percent ?? '—'}%</span>
+                <div className="flex justify-between items-center mt-4 pt-4 border-t border-[#1c1c1c]/10 text-sm">
+                  <span className="text-neutral-400 font-mono uppercase tracking-wider">Equivalency</span>
+                  <span className="font-mono font-black text-[#1c1c1c]">{mathStatus.percent ?? '—'}%</span>
                 </div>
               </div>
 
@@ -485,15 +535,14 @@ export default function App() {
                   : 'border-l-amber-500';
 
                 return (
-                  <div key={i} className={`bg-[#f8f5f2] p-4 border-l-4 ${borderClass}`}>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono uppercase tracking-wider text-neutral-500">Exam {i + 1}</span>
+                  <div key={i} className={`bg-[#f8f5f2] p-7 border-l-4 ${borderClass}`}>
+                    <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center gap-3">
                         <div className="flex border-2 border-[#1c1c1c] p-0.5 bg-white">
                           <button
                             type="button"
                             onClick={() => handleToggleExamType(i, 'AP')}
-                            className={`px-2 py-1 text-[10px] font-mono font-bold uppercase ${exam.type === 'AP' ? 'bg-[#1c1c1c] text-white' : 'text-neutral-400'}`}
+                            className={`px-4 py-1.5 text-sm font-mono font-bold uppercase transition-colors ${exam.type === 'AP' ? 'bg-[#1c1c1c] text-white' : 'text-neutral-400 hover:text-[#1c1c1c]'}`}
                             aria-label={`Set exam ${i + 1} to AP`}
                           >
                             AP
@@ -501,18 +550,18 @@ export default function App() {
                           <button
                             type="button"
                             onClick={() => handleToggleExamType(i, 'CLEP')}
-                            className={`px-2 py-1 text-[10px] font-mono font-bold uppercase ${exam.type === 'CLEP' ? 'bg-[#1c1c1c] text-white' : 'text-neutral-400'}`}
+                            className={`px-4 py-1.5 text-sm font-mono font-bold uppercase transition-colors ${exam.type === 'CLEP' ? 'bg-[#1c1c1c] text-white' : 'text-neutral-400 hover:text-[#1c1c1c]'}`}
                             aria-label={`Set exam ${i + 1} to CLEP`}
                           >
                             CLEP
                           </button>
                         </div>
                       </div>
-                      <span className="text-2xl font-mono font-black">{exam.value || '—'}</span>
+                      <span className="text-5xl font-mono font-black">{exam.value || '—'}</span>
                     </div>
 
                     {exam.type === 'AP' ? (
-                      <div className="grid grid-cols-4 gap-1.5">
+                      <div className="grid grid-cols-4 gap-3">
                         {[2, 3, 4, 5].map((grade) => {
                           const isSelected = exam.value === String(grade);
                           return (
@@ -520,7 +569,7 @@ export default function App() {
                               type="button"
                               key={grade}
                               onClick={() => handleUpdateExamValue(i, String(grade))}
-                              className={`py-2.5 text-base font-mono font-black border-2 ${isSelected ? 'bg-[#1c1c1c] text-white border-[#1c1c1c]' : 'bg-white text-[#1c1c1c] border-neutral-300 hover:border-[#1c1c1c]'}`}
+                              className={`py-4 text-xl font-mono font-black border-2 transition-all ${isSelected ? 'bg-[#1c1c1c] text-white border-[#1c1c1c] shadow-[3px_3px_0_0_#D32F2F]' : 'bg-white text-[#1c1c1c] border-neutral-200 hover:border-[#1c1c1c]'}`}
                               aria-label={`AP grade ${grade}`}
                             >
                               {grade}
@@ -537,13 +586,13 @@ export default function App() {
                         value={exam.value || '35'}
                         onChange={(e) => handleUpdateExamValue(i, e.target.value)}
                         aria-label={`CLEP score for exam ${i + 1}`}
-                        className="w-full h-2.5 bg-[#e0dbd5] appearance-none cursor-pointer accent-[#1c1c1c] focus:outline-hidden"
+                        className="w-full h-3.5 bg-[#e0dbd5] appearance-none cursor-pointer accent-[#1c1c1c] focus:outline-hidden rounded-full"
                       />
                     )}
 
-                    <div className="flex justify-between items-center mt-3 pt-3 border-t border-[#1c1c1c]/10 text-xs">
-                      <span className="text-neutral-500 font-mono uppercase">Mapped</span>
-                      <span className="font-mono font-bold">{status.percent ?? '—'}%</span>
+                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-[#1c1c1c]/10 text-sm">
+                      <span className="text-neutral-400 font-mono uppercase tracking-wider">Equivalency</span>
+                      <span className="font-mono font-black text-[#1c1c1c]">{status.percent ?? '—'}%</span>
                     </div>
                   </div>
                 );
@@ -560,10 +609,10 @@ export default function App() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="bg-white border-2 border-dashed border-[#1c1c1c]/25 p-12 text-center flex flex-col items-center justify-center min-h-[450px]"
+                  className="bg-white border-2 border-dashed border-[#1c1c1c]/20 p-16 text-center flex flex-col items-center justify-center min-h-[550px] shadow-[5px_5px_0_0_rgba(28,28,28,0.06)]"
                 >
-                  <Compass className="w-8 h-8 text-neutral-300 mb-4 stroke-1 animate-pulse" />
-                  <h3 className="text-sm font-mono font-bold uppercase tracking-widest text-neutral-500">
+                  <Compass className="w-12 h-12 text-neutral-300 mb-5 stroke-1 animate-pulse" />
+                  <h3 className="text-sm font-mono font-bold uppercase tracking-[0.3em] text-neutral-400">
                     Awaiting inputs
                   </h3>
                 </motion.div>
@@ -573,23 +622,23 @@ export default function App() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="bg-white border-2 border-[#1c1c1c] p-6 sm:p-7 space-y-6 print:border-none print:p-0"
+                  className="bg-white border-2 border-[#1c1c1c] p-8 sm:p-10 space-y-7 print:border-none print:p-0 shadow-[5px_5px_0_0_#1c1c1c]"
                 >
                   {/* TOP: Save button */}
-                  <div className="flex items-center justify-center gap-3 print:hidden">
+                  <div className="flex items-center justify-center print:hidden">
                     <button
                       onClick={handleSaveCard}
-                      className="px-5 py-2.5 text-sm font-mono font-bold uppercase border-2 border-[#1c1c1c] bg-[#1c1c1c] text-white hover:bg-white hover:text-[#1c1c1c] transition-colors flex items-center gap-2 cursor-pointer"
+                      className="px-10 py-4 text-sm font-mono font-bold uppercase tracking-widest border-2 border-[#1c1c1c] bg-[#1c1c1c] text-white hover:bg-white hover:text-[#1c1c1c] transition-all flex items-center gap-3 cursor-pointer shadow-[4px_4px_0_0_#D32F2F] hover:shadow-[4px_4px_0_0_#1c1c1c]"
                       title="Export score report as PDF"
                     >
                       {saved ? (
                         <>
-                          <Check className="w-4 h-4 text-emerald-400" />
+                          <Check className="w-5 h-5 text-emerald-400" />
                           Saved
                         </>
                       ) : (
                         <>
-                          <Download className="w-4 h-4" />
+                          <Download className="w-5 h-5" />
                           Save Score
                         </>
                       )}
@@ -598,7 +647,7 @@ export default function App() {
 
                   {/* HERO: Score */}
                   <div className="text-center py-6">
-                    <p className="text-xs font-mono text-neutral-500 uppercase tracking-widest mb-3">
+                    <p className="text-sm font-mono text-neutral-400 uppercase tracking-[0.3em] mb-5">
                       Equivalency Average
                     </p>
                     <motion.div
@@ -606,16 +655,16 @@ export default function App() {
                       initial={{ scale: 0.95, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ duration: 0.2 }}
-                      className="text-8xl sm:text-9xl font-serif font-black tracking-tighter text-[#1c1c1c] leading-none"
+                      className="text-[6rem] sm:text-[8rem] font-serif font-black tracking-tighter text-[#1c1c1c] leading-none"
                     >
-                      {calculatedInfo.average.toFixed(2)}<span className="text-4xl sm:text-5xl">%</span>
+                      {calculatedInfo.average.toFixed(2)}<span className="text-[3rem] sm:text-[4rem] text-[#D32F2F]">%</span>
                     </motion.div>
                   </div>
 
                   {/* FOOTER: Formula */}
-                  <div className="pt-4 border-t border-[#1c1c1c]/15 flex justify-between items-center text-xs font-mono text-neutral-500">
-                    <span className="uppercase tracking-wider">{calculatedInfo.sum.toFixed(1)} / 6</span>
-                    <span className="font-bold text-[#1c1c1c]">6 exams</span>
+                  <div className="pt-5 border-t border-[#1c1c1c]/10 flex justify-between items-center text-sm font-mono text-neutral-400">
+                    <span className="uppercase tracking-widest">{calculatedInfo.sum.toFixed(1)} / 6</span>
+                    <span className="font-bold text-[#1c1c1c] uppercase tracking-wider">6 exams</span>
                   </div>
                 </motion.div>
               )}
@@ -625,6 +674,9 @@ export default function App() {
         </div>
 
       </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Exam Name Modal */}
       <AnimatePresence>
@@ -715,7 +767,7 @@ export default function App() {
                                       type="button"
                                       onClick={() => {
                                         const updated = [...additionalExams];
-                                        updated[i] = { ...updated[i], name };
+                                        updated[i] = { ...updated[i], name, type: 'CLEP' };
                                         setAdditionalExams(updated);
                                         setActiveExamPicker(null);
                                       }}
@@ -743,7 +795,7 @@ export default function App() {
                                       type="button"
                                       onClick={() => {
                                         const updated = [...additionalExams];
-                                        updated[i] = { ...updated[i], name };
+                                        updated[i] = { ...updated[i], name, type: 'AP' };
                                         setAdditionalExams(updated);
                                         setActiveExamPicker(null);
                                       }}
