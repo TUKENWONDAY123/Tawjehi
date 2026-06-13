@@ -419,7 +419,7 @@ export default function App() {
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 0.6, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="w-12 sm:w-16 md:w-20 h-0.5 bg-[#D32F2F] mx-auto mt-5 sm:mt-6 md:mb-6 origin-left"
+                className="w-12 sm:w-16 md:w-20 h-0.5 bg-[#D32F2F] mx-auto mt-5 sm:mt-6 mb-6 sm:mb-8 md:mb-10 origin-left"
               />
 
               <motion.button
